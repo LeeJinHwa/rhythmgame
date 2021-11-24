@@ -1,0 +1,168 @@
+import pygame
+
+# --- constants ---
+
+#grid
+W = 25
+H = 25
+M = 2
+
+SIZE = (800, 550)
+
+BLACK = (  0,   0,   0)
+WHITE = (255, 255, 255)
+RED   = (255,   0,   0)
+FPS = 25
+
+#이미지로딩, 처리
+beat = pygame.image.load("C:/Users/sunsum/Documents/opensource/2.png") #하늘색
+beat = pygame.transform.scale(beat, (25, 25))
+beat_Rect = beat.get_rect()
+beat_Rect.centerx = 446
+beat_Rect.centery = 0
+
+beat2 = pygame.image.load("C:/Users/sunsum/Documents/opensource/3.png") #빨간색
+beat2 = pygame.transform.scale(beat2, (25, 25))
+beat_Rect2 = beat.get_rect()
+beat_Rect2.centerx = 149
+beat_Rect2.centery = 0
+
+img_bg = pygame.image.load("C:/Users/sunsum/Documents/opensource/bground.png") #배경
+img_bg = pygame.transform.scale(img_bg, (800, 550))
+
+
+# --- classes ---
+
+class Player:
+
+    def __init__(self):
+        # to keep position and size
+        self.rect = pygame.Rect(0, 0, 20, 20)
+
+        # set start position
+        self.rect.center = 14, 149
+
+
+        self.r = 10
+
+    def draw(self):
+        pygame.draw.circle(screen, BLACK, self.rect.center, self.r)
+
+    def update(self, event):
+        # create copy of position
+        newrect = self.rect.copy() #pygame.rect (0, 0, 20, 20) 복사
+
+        # move "copy" to new position
+        if event.key == pygame.K_LEFT:
+            newrect.x -= 27
+        elif event.key == pygame.K_RIGHT:
+            newrect.x += 27
+        elif event.key == pygame.K_UP:
+            newrect.y -= 27
+        elif event.key == pygame.K_DOWN:
+            newrect.y += 27
+
+
+
+        # check if "copy" is still in rectangles
+        for rectangle in all_rectangles: #all_rectangles = []
+            if newrect.colliderect(rectangle):
+                # now you can set new position
+                self.rect = newrect
+                # don't check other rectangles
+                break
+
+# --- main ---
+
+# - init -
+
+pygame.init()
+
+screen = pygame.display.set_mode(SIZE)
+screen_rect = screen.get_rect()
+
+# - objects -
+
+player1 = Player()
+
+# create list with rectangles (but not draw them)
+
+
+
+map = [
+    "                                ",
+    "                                ",
+    "                                ",
+    "                                ",
+    "                                ",
+    "################################",
+    "             #                 #",
+    "             #     #############",
+    "             #     #            ",
+    "             #     #############",
+    "             #######    #      #",
+    "################################",
+    "################################",
+    "                        #      #",
+    "                        ########",
+]
+
+all_rectangles = []
+
+r: int 
+for r, row in enumerate(map): #enumerate 열거하다, 세다 mpalist를 세는것
+    for c, item in enumerate(row): # row 행
+        if item == '#':
+            all_rectangles.append(pygame.Rect((W + M) * c + M, ((H + M) * r + M), W, H))
+            #사각형 pygame.rect(왼쪽, 위쪽, 너비 ,높이 ) > rect
+            #append는 덧붙인다는 뜻으로 괄호( ) 안에 값을 입력하면 새로운 요소를 array 맨 끝에 객체로 추가한다.
+# - mainloop -
+
+clock = pygame.time.Clock()
+done = False
+
+while not done:
+
+
+    # - events (without draws) -
+    for event in pygame.event.get():
+        if event.type == pygame.QUIT:
+            done = True
+
+        elif event.type == pygame.KEYDOWN:
+            player1.update(event)
+
+        if beat_Rect.y >800:
+            beat_Rect.y = 0 -beat_Rect.height
+
+        if beat_Rect2.y >800:
+            beat_Rect2.y = 0 -beat_Rect2.height
+
+
+
+
+
+
+
+
+    # - draw everything in one place -
+
+    screen.fill(WHITE)
+    screen.blit(img_bg, screen_rect)
+    for rectangle in all_rectangles:
+        pygame.draw.rect(screen, WHITE, rectangle, 1)
+    player1.draw()
+
+    beat_Rect.y += 15
+    beat_Rect2.y += 30
+    screen.blit(beat, beat_Rect)
+    screen.blit(beat2, beat_Rect2)
+    pygame.display.flip()
+
+    # - FPS - keep the same speed on all computers -
+
+    clock.tick(FPS)
+
+
+# - end -
+pygame.quit()
